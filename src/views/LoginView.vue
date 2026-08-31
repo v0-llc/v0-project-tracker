@@ -9,8 +9,12 @@ const auth = useAuthStore()
 const router = useRouter()
 
 async function signIn() {
-  await auth.signInWithGoogle()
-  await router.push({ name: 'board' })
+  try {
+    await auth.signInWithGoogle()
+    await router.push({ name: 'board' })
+  } catch {
+    /* error is shown on the login screen */
+  }
 }
 
 async function tryLocal() {

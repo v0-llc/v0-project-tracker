@@ -7,7 +7,10 @@ import {
   signOut,
   type User,
 } from 'firebase/auth'
+import { isAllowedEmail } from '../lib/allowedUsers'
 import { isFirebaseConfigured, requireAuth } from '../firebase'
+
+const ACCESS_DENIED = 'This Google account is not allowed to use Slate.'
 
 const LOCAL_SESSION_KEY = 'slate.local-session'
 
@@ -35,7 +38,14 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   if (isFirebaseConfigured) {
-    onAuthStateChanged(requireAuth(), (next) => {
+    onAuthStateChanged(requireAuth(), async (next) => {
+      if (next && !isAllowedEmail(next.email)) {
+        user.value = null
+        error.value = ACCESS_DENIED
+        ready.value = true
+        await signOut(requireAuth())
+        return
+      }
       user.value = next
       ready.value = true
     })
@@ -48,10 +58,17 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = ''
     pending.value = true
     try {
-      await signInWithPopup(requireAuth(), new GoogleAuthProvider())
+      const credential = await signInWithPopup(requireAuth(), new GoogleAuthProvider())
+      if (!isAllowedEmail(credential.user.email)) {
+        await signOut(requireAuth())
+        error.value = ACCESS_DENIED
+        throw new Error(ACCESS_DENIED)
+      }
     } catch (err) {
-      error.value =
-        err instanceof Error ? err.message : 'Google sign-in failed'
+      if (!error.value) {
+        error.value =
+          err instanceof Error ? err.message : 'Google sign-in failed'
+      }
       throw err
     } finally {
       pending.value = false
