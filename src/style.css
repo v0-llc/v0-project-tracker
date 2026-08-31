@@ -50,6 +50,7 @@ html,
 body,
 #app {
   height: 100%;
+  overscroll-behavior: none;
 }
 
 body {
@@ -224,11 +225,11 @@ a {
   grid-template-rows: auto 1fr;
   grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .app-header {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 10;
   display: flex;
   align-items: center;
@@ -238,6 +239,7 @@ a {
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(16px);
+  overscroll-behavior: none;
 }
 
 .brand {
@@ -444,6 +446,15 @@ a {
   background: color-mix(in srgb, var(--bg-raised) 76%, transparent);
 }
 
+.column.tinted {
+  background: color-mix(in srgb, var(--column-tint) 26%, var(--bg-raised));
+  border-color: color-mix(in srgb, var(--column-tint) 38%, var(--line));
+}
+
+html[data-theme='dark'] .column.tinted {
+  background: color-mix(in srgb, var(--column-tint) 18%, var(--bg-raised));
+}
+
 .column-head {
   display: flex;
   align-items: flex-start;
@@ -452,12 +463,141 @@ a {
   margin-bottom: 12px;
 }
 
+.column-tint {
+  position: relative;
+  flex: 0 0 auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease;
+}
+
+.column:hover .column-tint,
+.column:focus-within .column-tint,
+.column-tint.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.column-tint-swatch,
+.column-tint-choice {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  line-height: 0;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.column-tint-swatch {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.column-tint-disc {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+svg.column-tint-disc {
+  box-shadow: none;
+  overflow: visible;
+}
+
+.column-tint-swatch:hover,
+.column-tint-choice:hover {
+  color: var(--ink);
+}
+
+.column-tint-menu {
+  position: fixed;
+  z-index: 40;
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  padding: 12px 14px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg-raised);
+  box-shadow: var(--shadow);
+}
+
+.column-tint-menu .label {
+  margin: 0 0 8px;
+}
+
+.column-tint-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 32px);
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.column-tint-choice {
+  width: 32px;
+  height: 32px;
+}
+
+.column-tint-choice .column-tint-disc {
+  width: 22px;
+  height: 22px;
+}
+
+.column-tint-choice[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 2px var(--ink);
+  border-radius: 50%;
+}
+
+.column-tint-custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.column-tint-custom input {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.column-inactive.collapsed .column-tint-swatch {
+  margin: 0;
+}
+
 .column-title {
   display: flex;
   flex-direction: column;
   gap: 4px;
   min-width: 0;
   flex: 1;
+}
+
+.column-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 16px;
 }
 
 .column-title input {
@@ -715,6 +855,12 @@ a {
   border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
 }
 
+.column-retainer.tinted,
+.column-inactive.tinted {
+  background: color-mix(in srgb, var(--column-tint) 26%, var(--bg-raised));
+  border-color: color-mix(in srgb, var(--column-tint) 38%, var(--line));
+}
+
 .column-inactive {
   background: color-mix(in srgb, var(--bg-sunken) 70%, var(--bg-raised));
 }
@@ -724,6 +870,22 @@ a {
   min-height: calc(100vh - 120px);
   padding: 12px 8px;
   cursor: pointer;
+}
+
+.column-inactive.collapsed .column-head {
+  height: 100%;
+  margin-bottom: 0;
+}
+
+.column-inactive.collapsed .column-title {
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.column-inactive.collapsed .column-meta {
+  flex-direction: column;
+  align-items: center;
 }
 
 .inactive-toggle {
@@ -739,9 +901,11 @@ a {
 }
 
 .column-inactive.collapsed .inactive-toggle {
-  height: 100%;
-  min-height: 220px;
+  flex: 1;
+  width: auto;
+  min-height: 160px;
   justify-content: flex-end;
+  align-items: center;
 }
 
 .column-inactive.collapsed .column-lock {

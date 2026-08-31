@@ -52,6 +52,7 @@ export function columnsChanged(before: Column[], after: Column[]) {
       column.id !== next.id ||
       column.name !== next.name ||
       column.order !== next.order ||
+      column.color !== next.color ||
       columnKind(column) !== columnKind(next)
     )
   })

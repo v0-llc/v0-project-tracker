@@ -5,6 +5,7 @@ export interface Column {
   name: string
   order: number
   kind?: ColumnKind
+  color?: string
 }
 
 export interface Client {

@@ -521,7 +521,11 @@ export const useBoardStore = defineStore('board', () => {
     columns.value = withPinnedColumns([
       ...next,
       ...columns.value.filter(isPinnedColumn),
-    ])
+    ]).map((column) => {
+      if (column.color) return column
+      const { color: _removed, ...rest } = column
+      return rest
+    })
     if (auth.isLocal || !isFirebaseConfigured) {
       saveLocal()
       return
@@ -535,6 +539,21 @@ export const useBoardStore = defineStore('board', () => {
     const next = columns.value.map((column) =>
       column.id === id ? { ...column, name: name.trim() || column.name } : column,
     )
+    await persistColumns(next)
+  }
+
+  async function setColumnColor(id: string, color: string) {
+    const current = columns.value.find((column) => column.id === id)
+    if (!current) return
+    const nextColor = color.trim()
+    const next = columns.value.map((column) => {
+      if (column.id !== id) return column
+      if (!nextColor) {
+        const { color: _removed, ...rest } = column
+        return rest
+      }
+      return { ...column, color: nextColor }
+    })
     await persistColumns(next)
   }
 
@@ -858,6 +877,7 @@ export const useBoardStore = defineStore('board', () => {
     clientById,
     clientName,
     renameColumn,
+    setColumnColor,
     addColumn,
     removeColumn,
     createClient,

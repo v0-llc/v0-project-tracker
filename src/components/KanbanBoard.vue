@@ -5,6 +5,7 @@ import { columnKind } from '../lib/columns'
 import { effectiveRate, formatHours, formatMoney, formatRate, hoursInMonth, totalHours } from '../lib/format'
 import { useBoardStore } from '../stores/board'
 import type { Column, Project } from '../types'
+import ColumnTint from './ColumnTint.vue'
 import ProjectCard from './ProjectCard.vue'
 import ProjectModal from './ProjectModal.vue'
 
@@ -69,8 +70,13 @@ function columnClass(column: Column) {
   return {
     'column-retainer': kind === 'retainer',
     'column-inactive': kind === 'inactive',
+    tinted: Boolean(column.color),
     collapsed: kind === 'inactive' && !inactiveOpen.value,
   }
+}
+
+function columnStyle(column: Column) {
+  return column.color ? { '--column-tint': column.color } : undefined
 }
 </script>
 
@@ -86,10 +92,15 @@ function columnClass(column: Column) {
       v-for="column in board.workflowColumns"
       :key="column.id"
       class="column"
+      :class="columnClass(column)"
+      :style="columnStyle(column)"
     >
       <header class="column-head">
         <div class="column-title">
-          <span class="column-count">{{ lists[column.id]?.length ?? 0 }}</span>
+          <div class="column-meta">
+            <span class="column-count">{{ lists[column.id]?.length ?? 0 }}</span>
+            <ColumnTint :column-id="column.id" :color="column.color" />
+          </div>
           <input
             :value="column.name"
             :aria-label="`Rename ${column.name}`"
@@ -151,13 +162,19 @@ function columnClass(column: Column) {
       :key="board.retainerColumn.id"
       class="column"
       :class="columnClass(board.retainerColumn)"
+      :style="columnStyle(board.retainerColumn)"
     >
       <header class="column-head">
         <div class="column-title">
-          <span class="column-count">Retainer · {{ lists[board.retainerColumn.id]?.length ?? 0 }}</span>
+          <div class="column-meta">
+            <span class="column-count">Retainer · {{ lists[board.retainerColumn.id]?.length ?? 0 }}</span>
+            <ColumnTint :column-id="board.retainerColumn.id" :color="board.retainerColumn.color" />
+          </div>
           <strong class="column-lock">Retainers</strong>
         </div>
-        <button class="icon-btn" type="button" aria-label="Add retainer" @click="openCreate(board.retainerColumn.id)">+</button>
+        <div class="header-cluster">
+          <button class="icon-btn" type="button" aria-label="Add retainer" @click="openCreate(board.retainerColumn.id)">+</button>
+        </div>
       </header>
 
       <draggable
@@ -216,17 +233,23 @@ function columnClass(column: Column) {
       :key="board.inactiveColumn.id"
       class="column"
       :class="columnClass(board.inactiveColumn)"
+      :style="columnStyle(board.inactiveColumn)"
     >
       <header class="column-head">
-        <button
-          class="inactive-toggle"
-          type="button"
-          :aria-expanded="inactiveOpen"
-          @click="toggleInactive"
-        >
-          <span class="column-count">{{ lists[board.inactiveColumn.id]?.length ?? 0 }} paid up</span>
-          <strong class="column-lock">Inactive</strong>
-        </button>
+        <div class="column-title">
+          <div class="column-meta">
+            <span class="column-count">{{ lists[board.inactiveColumn.id]?.length ?? 0 }} paid up</span>
+            <ColumnTint :column-id="board.inactiveColumn.id" :color="board.inactiveColumn.color" />
+          </div>
+          <button
+            class="inactive-toggle"
+            type="button"
+            :aria-expanded="inactiveOpen"
+            @click="toggleInactive"
+          >
+            <strong class="column-lock">Inactive</strong>
+          </button>
+        </div>
       </header>
 
       <template v-if="inactiveOpen">
