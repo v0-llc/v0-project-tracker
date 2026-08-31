@@ -196,7 +196,7 @@ function columnClass(column: Column) {
                 <b>{{ formatHours(totalHours(element)) }}</b>
               </div>
               <div>
-                <span class="label">Budget</span>
+                <span class="label">Budget / mo</span>
                 <b>{{ formatMoney(element.budget) }}</b>
               </div>
               <div>

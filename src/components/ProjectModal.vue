@@ -27,7 +27,11 @@ const creatingClient = computed(() => draft.clientId === NEW_CLIENT_VALUE)
 const previewHours = computed(() => (props.project ? totalHours(props.project) : 0))
 const previewRate = computed(() => {
   if (!props.project) return null
-  return effectiveRate({ ...props.project, budget: Number(draft.budget) || 0 })
+  return effectiveRate({
+    ...props.project,
+    budget: Number(draft.budget) || 0,
+    retainer: draft.retainer,
+  })
 })
 const selectedClient = computed(() =>
   creatingClient.value ? null : board.clientById(draft.clientId),
@@ -255,7 +259,7 @@ function setInactive(on: boolean) {
             <b>{{ formatHours(previewHours) }}</b>
           </div>
           <div>
-            <span>Budget</span>
+            <span>{{ draft.retainer ? 'Budget / month' : 'Budget' }}</span>
             <b>{{ formatMoney(Number(draft.budget) || 0) }}</b>
           </div>
           <div>

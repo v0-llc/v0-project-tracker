@@ -16,10 +16,39 @@ export function hoursInMonth(
   }, 0)
 }
 
+function yearMonthFromKey(date: string) {
+  const match = date.trim().match(/^(\d{4})-(\d{1,2})/)
+  if (!match) return null
+  return { year: Number(match[1]), month: Number(match[2]) - 1 }
+}
+
+export function retainerMonthCount(project: Project, now = new Date()): number {
+  const logged = Object.entries(project.hoursByDate)
+    .filter(([, hours]) => hours)
+    .map(([date]) => date)
+    .sort()
+  const start =
+    (logged[0] ? yearMonthFromKey(logged[0]) : null) ?? {
+      year: new Date(project.createdAt).getFullYear(),
+      month: new Date(project.createdAt).getMonth(),
+    }
+  const end =
+    project.inactive && logged.length
+      ? (yearMonthFromKey(logged[logged.length - 1]) ?? start)
+      : { year: now.getFullYear(), month: now.getMonth() }
+  return Math.max(1, (end.year - start.year) * 12 + (end.month - start.month) + 1)
+}
+
+export function effectiveBudget(project: Project): number {
+  if (!project.retainer || project.budget <= 0) return project.budget
+  return project.budget * retainerMonthCount(project)
+}
+
 export function effectiveRate(project: Project): number | null {
   const hours = totalHours(project)
-  if (hours <= 0 || project.budget <= 0) return null
-  return project.budget / hours
+  const budget = effectiveBudget(project)
+  if (hours <= 0 || budget <= 0) return null
+  return budget / hours
 }
 
 export function formatHours(value: number): string {
