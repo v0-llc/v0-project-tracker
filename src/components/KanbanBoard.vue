@@ -5,6 +5,7 @@ import { columnKind } from '../lib/columns'
 import { effectiveRate, formatHours, formatMoney, formatRate, hoursInMonth, totalHours } from '../lib/format'
 import { useBoardStore } from '../stores/board'
 import type { Column, Project } from '../types'
+import ColumnDensity from './ColumnDensity.vue'
 import ColumnTint from './ColumnTint.vue'
 import ProjectCard from './ProjectCard.vue'
 import ProjectModal from './ProjectModal.vue'
@@ -61,6 +62,15 @@ async function removeColumn(columnId: string, name: string) {
   await board.removeColumn(columnId)
 }
 
+function onDragStart() {
+  dragging.value = true
+  window.getSelection()?.removeAllRanges()
+}
+
+function onDragEnd() {
+  dragging.value = false
+}
+
 function monthHours(project: Project) {
   return hoursInMonth(project, now.getFullYear(), now.getMonth())
 }
@@ -71,6 +81,7 @@ function columnClass(column: Column) {
     'column-retainer': kind === 'retainer',
     'column-inactive': kind === 'inactive',
     tinted: Boolean(column.color),
+    condensed: Boolean(column.condensed),
     collapsed: kind === 'inactive' && !inactiveOpen.value,
   }
 }
@@ -87,7 +98,7 @@ function columnStyle(column: Column) {
         Add column
       </button>
     </div>
-    <div class="board">
+    <div class="board" :class="{ 'is-dragging': dragging }">
     <article
       v-for="column in board.workflowColumns"
       :key="column.id"
@@ -100,6 +111,7 @@ function columnStyle(column: Column) {
           <div class="column-meta">
             <span class="column-count">{{ lists[column.id]?.length ?? 0 }}</span>
             <ColumnTint :column-id="column.id" :color="column.color" />
+            <ColumnDensity :column-id="column.id" :condensed="column.condensed" />
           </div>
           <input
             :value="column.name"
@@ -131,11 +143,11 @@ function columnStyle(column: Column) {
         ghost-class="card-ghost"
         drag-class="card-drag"
         @update:model-value="(next: Project[]) => onListChange(column.id, next)"
-        @start="dragging = true"
-        @end="dragging = false"
+        @start="onDragStart"
+        @end="onDragEnd"
       >
         <template #item="{ element }: { element: Project }">
-          <ProjectCard :project="element" @open="openProject(element)">
+          <ProjectCard :project="element" :condensed="column.condensed" @open="openProject(element)">
             <div class="card-meta">
               <div>
                 <span class="label">Hours</span>
@@ -169,6 +181,7 @@ function columnStyle(column: Column) {
           <div class="column-meta">
             <span class="column-count">Retainer · {{ lists[board.retainerColumn.id]?.length ?? 0 }}</span>
             <ColumnTint :column-id="board.retainerColumn.id" :color="board.retainerColumn.color" />
+            <ColumnDensity :column-id="board.retainerColumn.id" :condensed="board.retainerColumn.condensed" />
           </div>
           <strong class="column-lock">Retainers</strong>
         </div>
@@ -187,11 +200,11 @@ function columnStyle(column: Column) {
         ghost-class="card-ghost"
         drag-class="card-drag"
         @update:model-value="(next: Project[]) => onListChange(board.retainerColumn!.id, next)"
-        @start="dragging = true"
-        @end="dragging = false"
+        @start="onDragStart"
+        @end="onDragEnd"
       >
         <template #item="{ element }: { element: Project }">
-          <ProjectCard :project="element" @open="openProject(element)">
+          <ProjectCard :project="element" :condensed="board.retainerColumn.condensed" @open="openProject(element)">
             <div
               class="pace"
               :class="{
@@ -240,6 +253,7 @@ function columnStyle(column: Column) {
           <div class="column-meta">
             <span class="column-count">{{ lists[board.inactiveColumn.id]?.length ?? 0 }} paid up</span>
             <ColumnTint :column-id="board.inactiveColumn.id" :color="board.inactiveColumn.color" />
+            <ColumnDensity :column-id="board.inactiveColumn.id" :condensed="board.inactiveColumn.condensed" />
           </div>
           <button
             class="inactive-toggle"
@@ -263,11 +277,11 @@ function columnStyle(column: Column) {
           ghost-class="card-ghost"
           drag-class="card-drag"
           @update:model-value="(next: Project[]) => onListChange(board.inactiveColumn!.id, next)"
-          @start="dragging = true"
-          @end="dragging = false"
+          @start="onDragStart"
+          @end="onDragEnd"
         >
           <template #item="{ element }: { element: Project }">
-            <ProjectCard :project="element" muted @open="openProject(element)">
+            <ProjectCard :project="element" muted :condensed="board.inactiveColumn.condensed" @open="openProject(element)">
               <div class="card-meta">
                 <div>
                   <span class="label">Hours</span>
@@ -296,8 +310,8 @@ function columnStyle(column: Column) {
         :force-fallback="true"
         ghost-class="card-ghost"
         @update:model-value="(next: Project[]) => onListChange(board.inactiveColumn!.id, next)"
-        @start="dragging = true"
-        @end="dragging = false"
+        @start="onDragStart"
+        @end="onDragEnd"
       >
         <template #item="{ element }: { element: Project }">
           <span class="sr-only">{{ element.name }}</span>

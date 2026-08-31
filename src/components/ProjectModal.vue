@@ -103,6 +103,21 @@ async function addHours() {
   logAmount.value = ''
 }
 
+async function archive() {
+  if (!props.project) return
+  if (!window.confirm(`Archive “${props.project.name}”? It leaves the board and hours. Nothing is deleted.`)) {
+    return
+  }
+  await board.setArchived(props.project.id, true)
+  emit('close')
+}
+
+async function restore() {
+  if (!props.project) return
+  await board.setArchived(props.project.id, false)
+  emit('close')
+}
+
 async function remove() {
   if (!props.project) return
   if (!window.confirm(`Delete “${props.project.name}”? This cannot be undone.`)) return
@@ -144,7 +159,9 @@ function setInactive(on: boolean) {
     <div class="modal" @click.stop>
       <header>
         <div>
-          <p class="label">{{ isEdit ? 'Project' : 'New project' }}</p>
+          <p class="label">
+            {{ props.project?.archived ? 'Archived' : isEdit ? 'Project' : 'New project' }}
+          </p>
           <h2>{{ isEdit ? draft.name || 'Untitled' : 'Open a job' }}</h2>
         </div>
         <button class="icon-btn" type="button" aria-label="Close" @click="emit('close')">✕</button>
@@ -289,9 +306,17 @@ function setInactive(on: boolean) {
       </form>
 
       <footer>
-        <button v-if="project" class="text-btn danger-btn" type="button" @click="remove">
-          Delete
-        </button>
+        <div v-if="project" class="header-cluster">
+          <button v-if="!project.archived" class="text-btn" type="button" @click="archive">
+            Archive
+          </button>
+          <button v-else class="text-btn" type="button" @click="restore">
+            Restore to board
+          </button>
+          <button class="text-btn danger-btn" type="button" @click="remove">
+            Delete
+          </button>
+        </div>
         <span v-else></span>
         <div class="header-cluster">
           <button class="ghost-btn" type="button" @click="emit('close')">Cancel</button>

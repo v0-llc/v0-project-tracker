@@ -279,7 +279,7 @@ a {
 
 .view-switch a {
   text-decoration: none;
-  padding: 7px 14px;
+  padding: 7px 12px;
   border-radius: 999px;
   font-size: 13px;
   color: var(--ink-soft);
@@ -440,7 +440,7 @@ a {
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 120px);
-  padding: 12px;
+  padding: 8px;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: color-mix(in srgb, var(--bg-raised) 76%, transparent);
@@ -460,7 +460,7 @@ html[data-theme='dark'] .column.tinted {
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .column-tint {
@@ -473,9 +473,47 @@ html[data-theme='dark'] .column.tinted {
 
 .column:hover .column-tint,
 .column:focus-within .column-tint,
-.column-tint.open {
+.column-tint.open,
+.column:hover .column-density,
+.column:focus-within .column-density,
+.column-density.on {
   opacity: 1;
   pointer-events: auto;
+}
+
+.column-density {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease, color 0.16s ease, background 0.16s ease;
+}
+
+.column-density svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.column-density:hover {
+  color: var(--ink);
+}
+
+.column-density.on {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .column-tint-swatch,
@@ -610,6 +648,8 @@ svg.column-tint-disc {
   letter-spacing: -0.03em;
   outline: none;
   border-bottom: 1px solid transparent;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .column-title input:focus {
@@ -625,7 +665,7 @@ svg.column-tint-disc {
 .card-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex: 1;
   min-height: 80px;
 }
@@ -644,6 +684,8 @@ svg.column-tint-disc {
   cursor: pointer;
   text-align: left;
   width: 100%;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .project-card.starred {
@@ -664,6 +706,26 @@ svg.column-tint-disc {
   min-width: 0;
   min-height: 44px;
   padding-right: 4px;
+}
+
+.project-card.condensed {
+  grid-template-rows: auto;
+  align-items: center;
+  padding: 7px 4px 7px 12px;
+}
+
+.project-card.condensed .card-copy {
+  min-height: 0;
+}
+
+.project-card.condensed h3 {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.project-card.condensed .card-star {
+  align-self: center;
 }
 
 .card-fold {
@@ -843,6 +905,12 @@ svg.column-tint-disc {
   transform: rotate(1.2deg);
 }
 
+.board.is-dragging,
+.board.is-dragging * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
 .column-lock {
   display: block;
   font-size: 16px;
@@ -868,7 +936,7 @@ svg.column-tint-disc {
 .column-inactive.collapsed {
   flex: 0 0 76px;
   min-height: calc(100vh - 120px);
-  padding: 12px 8px;
+  padding: 8px;
   cursor: pointer;
 }
 
@@ -1339,6 +1407,74 @@ button.hours-head:hover {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent);
+}
+
+.archive-ledger {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--bg-raised);
+  overflow: auto;
+}
+
+.archive-head,
+.archive-row {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1.6fr) minmax(7rem, 1fr) 5.5rem 6.5rem 5.5rem;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.archive-head {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border-bottom: 1px solid var(--line);
+}
+
+.archive-row {
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.archive-row:first-of-type {
+  border-top: 0;
+}
+
+.archive-row:hover {
+  background: color-mix(in srgb, var(--bg-sunken) 55%, transparent);
+}
+
+.archive-job {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.archive-job b {
+  font-weight: 580;
+  letter-spacing: -0.03em;
+}
+
+.archive-job small,
+.archive-row span {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.archive-job b {
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--ink);
 }
 
 @media (max-width: 860px) {

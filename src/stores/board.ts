@@ -93,6 +93,7 @@ function parseProject(id: string, data: Record<string, unknown>): Project {
     retainerHoursPerMonth: Number(data.retainerHoursPerMonth) || 0,
     inactive: Boolean(data.inactive),
     starred: Boolean(data.starred),
+    archived: Boolean(data.archived),
     createdAt: toMillis(data.createdAt),
     updatedAt: toMillis(data.updatedAt),
   }
@@ -165,6 +166,16 @@ export const useBoardStore = defineStore('board', () => {
 
   const sortedProjects = computed(() =>
     [...projects.value].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
+  )
+
+  const liveProjects = computed(() =>
+    sortedProjects.value.filter((project) => !project.archived),
+  )
+
+  const archivedProjects = computed(() =>
+    [...projects.value]
+      .filter((project) => project.archived)
+      .sort((a, b) => a.name.localeCompare(b.name)),
   )
 
   const sortedClients = computed(() =>
@@ -261,6 +272,7 @@ export const useBoardStore = defineStore('board', () => {
         retainerHoursPerMonth: Number(project.retainerHoursPerMonth) || 0,
         inactive: Boolean(project.inactive),
         starred: Boolean(project.starred),
+        archived: Boolean(project.archived),
       }))
       clients.value = migrated.clients
       contacts.value = storedContacts ? (JSON.parse(storedContacts) as Contact[]) : []
@@ -506,7 +518,7 @@ export const useBoardStore = defineStore('board', () => {
   )
 
   function projectsInColumn(columnId: string): Project[] {
-    return sortedProjects.value.filter((project) => project.columnId === columnId)
+    return liveProjects.value.filter((project) => project.columnId === columnId)
   }
 
   function clientById(id: string) {
@@ -553,6 +565,20 @@ export const useBoardStore = defineStore('board', () => {
         return rest
       }
       return { ...column, color: nextColor }
+    })
+    await persistColumns(next)
+  }
+
+  async function setColumnCondensed(id: string, condensed: boolean) {
+    const current = columns.value.find((column) => column.id === id)
+    if (!current) return
+    const next = columns.value.map((column) => {
+      if (column.id !== id) return column
+      if (!condensed) {
+        const { condensed: _removed, ...rest } = column
+        return rest
+      }
+      return { ...column, condensed: true }
     })
     await persistColumns(next)
   }
@@ -713,6 +739,7 @@ export const useBoardStore = defineStore('board', () => {
         retainerHoursPerMonth: Number(draft.retainerHoursPerMonth) || 0,
         inactive: draft.inactive,
         starred: false,
+        archived: false,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       },
@@ -786,6 +813,21 @@ export const useBoardStore = defineStore('board', () => {
     }
     await updateDoc(projectRef(id), {
       starred,
+      updatedAt: serverTimestamp(),
+    })
+  }
+
+  async function setArchived(id: string, archived: boolean) {
+    const index = projects.value.findIndex((project) => project.id === id)
+    if (index === -1) return
+    const next = { ...projects.value[index], archived, updatedAt: Date.now() }
+    projects.value[index] = next
+    if (auth.isLocal || !isFirebaseConfigured) {
+      saveLocal()
+      return
+    }
+    await updateDoc(projectRef(id), {
+      archived,
       updatedAt: serverTimestamp(),
     })
   }
@@ -867,6 +909,8 @@ export const useBoardStore = defineStore('board', () => {
     retainerColumn,
     inactiveColumn,
     sortedProjects,
+    liveProjects,
+    archivedProjects,
     sortedClients,
     sortedContacts,
     sortedOccupations,
@@ -878,6 +922,7 @@ export const useBoardStore = defineStore('board', () => {
     clientName,
     renameColumn,
     setColumnColor,
+    setColumnCondensed,
     addColumn,
     removeColumn,
     createClient,
@@ -887,6 +932,7 @@ export const useBoardStore = defineStore('board', () => {
     createProject,
     updateProject,
     setStarred,
+    setArchived,
     deleteProject,
     reorderProjects,
     setHours,

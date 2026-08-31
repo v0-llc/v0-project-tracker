@@ -6,6 +6,7 @@ export interface Column {
   order: number
   kind?: ColumnKind
   color?: string
+  condensed?: boolean
 }
 
 export interface Client {
@@ -31,6 +32,7 @@ export interface Project {
   retainerHoursPerMonth: number
   inactive: boolean
   starred: boolean
+  archived: boolean
   createdAt: number
   updatedAt: number
 }

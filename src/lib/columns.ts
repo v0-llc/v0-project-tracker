@@ -53,6 +53,7 @@ export function columnsChanged(before: Column[], after: Column[]) {
       column.name !== next.name ||
       column.order !== next.order ||
       column.color !== next.color ||
+      Boolean(column.condensed) !== Boolean(next.condensed) ||
       columnKind(column) !== columnKind(next)
     )
   })

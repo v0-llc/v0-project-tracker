@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { watch } from 'vue'
 import { useAuthStore } from './stores/auth'
 import HoursGrid from './components/HoursGrid.vue'
+import ArchiveView from './components/ArchiveView.vue'
 import ContactsView from './components/ContactsView.vue'
 import KanbanBoard from './components/KanbanBoard.vue'
 import LoginView from './views/LoginView.vue'
@@ -23,6 +24,7 @@ export const router = createRouter({
         { path: '', name: 'board', component: KanbanBoard },
         { path: 'hours', name: 'hours', component: HoursGrid },
         { path: 'contacts', name: 'contacts', component: ContactsView },
+        { path: 'archive', name: 'archive', component: ArchiveView },
       ],
     },
   ],

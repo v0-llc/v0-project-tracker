@@ -44,6 +44,7 @@ watch(photoURL, () => {
         <RouterLink to="/">Board</RouterLink>
         <RouterLink to="/hours">Hours</RouterLink>
         <RouterLink to="/contacts">Contacts</RouterLink>
+        <RouterLink to="/archive">Archive</RouterLink>
       </nav>
 
       <div class="header-cluster">

@@ -25,6 +25,7 @@ const showInactive = ref(false)
 const hideIdle = ref(localStorage.getItem('slate.hours-hide-idle') === '1')
 const projects = computed(() =>
   board.sortedProjects.filter((project) => {
+    if (project.archived) return false
     if (project.inactive && !showInactive.value) return false
     if (hideIdle.value && hoursInMonth(project, year.value, month.value) <= 0) return false
     return true
@@ -101,7 +102,7 @@ const grandTotal = computed(() =>
       </div>
     </div>
 
-    <div v-if="!board.sortedProjects.length" class="empty">
+    <div v-if="!board.liveProjects.length" class="empty">
       Add a project on the board before logging hours.
     </div>
     <div v-else-if="!projects.length" class="empty">
