@@ -93,6 +93,7 @@ function parseProject(id: string, data: Record<string, unknown>): Project {
     retainerHoursPerMonth: Number(data.retainerHoursPerMonth) || 0,
     inactive: Boolean(data.inactive),
     starred: Boolean(data.starred),
+    alerted: Boolean(data.alerted),
     archived: Boolean(data.archived),
     createdAt: toMillis(data.createdAt),
     updatedAt: toMillis(data.updatedAt),
@@ -272,6 +273,7 @@ export const useBoardStore = defineStore('board', () => {
         retainerHoursPerMonth: Number(project.retainerHoursPerMonth) || 0,
         inactive: Boolean(project.inactive),
         starred: Boolean(project.starred),
+        alerted: Boolean(project.alerted),
         archived: Boolean(project.archived),
       }))
       clients.value = migrated.clients
@@ -739,6 +741,7 @@ export const useBoardStore = defineStore('board', () => {
         retainerHoursPerMonth: Number(draft.retainerHoursPerMonth) || 0,
         inactive: draft.inactive,
         starred: false,
+        alerted: false,
         archived: false,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -813,6 +816,21 @@ export const useBoardStore = defineStore('board', () => {
     }
     await updateDoc(projectRef(id), {
       starred,
+      updatedAt: serverTimestamp(),
+    })
+  }
+
+  async function setAlerted(id: string, alerted: boolean) {
+    const index = projects.value.findIndex((project) => project.id === id)
+    if (index === -1) return
+    const next = { ...projects.value[index], alerted, updatedAt: Date.now() }
+    projects.value[index] = next
+    if (auth.isLocal || !isFirebaseConfigured) {
+      saveLocal()
+      return
+    }
+    await updateDoc(projectRef(id), {
+      alerted,
       updatedAt: serverTimestamp(),
     })
   }
@@ -932,6 +950,7 @@ export const useBoardStore = defineStore('board', () => {
     createProject,
     updateProject,
     setStarred,
+    setAlerted,
     setArchived,
     deleteProject,
     reorderProjects,

@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useCardMeta } from '../composables/useCardMeta'
 import { useBoardStore } from '../stores/board'
 import type { Project } from '../types'
+import CardAlert from './CardAlert.vue'
 import CardStar from './CardStar.vue'
 
 const props = defineProps<{
@@ -27,7 +28,13 @@ const clientLabel = computed(() => board.clientName(props.project.clientId))
 <template>
   <article
     class="project-card"
-    :class="{ muted, condensed, 'meta-open': metaOpen && !condensed, starred: project.starred }"
+    :class="{
+      muted,
+      condensed,
+      'meta-open': metaOpen && !condensed,
+      starred: project.starred,
+      alerted: project.alerted,
+    }"
     role="button"
     tabindex="0"
     @click="emit('open')"
@@ -37,7 +44,10 @@ const clientLabel = computed(() => board.clientName(props.project.clientId))
       <h3>{{ project.name }}</h3>
       <p v-if="!condensed && clientLabel">{{ clientLabel }}</p>
     </div>
-    <CardStar :project="project" />
+    <div class="card-flags">
+      <CardAlert :project="project" />
+      <CardStar :project="project" />
+    </div>
     <template v-if="!condensed">
       <button
         class="card-fold"

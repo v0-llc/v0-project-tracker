@@ -32,6 +32,7 @@ export interface Project {
   retainerHoursPerMonth: number
   inactive: boolean
   starred: boolean
+  alerted: boolean
   archived: boolean
   createdAt: number
   updatedAt: number
