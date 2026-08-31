@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import draggable from 'vuedraggable'
 import { columnKind } from '../lib/columns'
 import { effectiveRate, formatHours, formatMoney, formatRate, hoursInMonth, totalHours } from '../lib/format'
@@ -11,6 +11,7 @@ import ProjectCard from './ProjectCard.vue'
 import ProjectModal from './ProjectModal.vue'
 
 const board = useBoardStore()
+const scrollerEl = ref<HTMLElement | null>(null)
 const dragging = ref(false)
 const modalOpen = ref(false)
 const activeProject = ref<Project | null>(null)
@@ -30,6 +31,13 @@ const now = new Date()
 function toggleInactive() {
   inactiveOpen.value = !inactiveOpen.value
   localStorage.setItem('slate.inactive-open', inactiveOpen.value ? '1' : '0')
+}
+
+function onInactiveRailClick(event: MouseEvent) {
+  if (inactiveOpen.value) return
+  const target = event.target as HTMLElement
+  if (target.closest('.column-tint, .column-density')) return
+  toggleInactive()
 }
 
 function openCreate(columnId: string) {
@@ -71,6 +79,28 @@ function onDragEnd() {
   dragging.value = false
 }
 
+function onBoardWheel(event: WheelEvent) {
+  const el = scrollerEl.value
+  if (!el) return
+  const dx = event.shiftKey && !event.deltaX ? event.deltaY : event.deltaX
+  const dy = event.shiftKey && !event.deltaX ? 0 : event.deltaY
+  if (Math.abs(dx) <= Math.abs(dy)) return
+  const max = el.scrollWidth - el.clientWidth
+  if (max <= 1) return
+  const next = Math.min(max, Math.max(0, el.scrollLeft + dx))
+  if (next === el.scrollLeft) return
+  event.preventDefault()
+  el.scrollLeft = next
+}
+
+onMounted(() => {
+  scrollerEl.value?.addEventListener('wheel', onBoardWheel, { passive: false })
+})
+
+onUnmounted(() => {
+  scrollerEl.value?.removeEventListener('wheel', onBoardWheel)
+})
+
 function monthHours(project: Project) {
   return hoursInMonth(project, now.getFullYear(), now.getMonth())
 }
@@ -98,6 +128,7 @@ function columnStyle(column: Column) {
         Add column
       </button>
     </div>
+    <div ref="scrollerEl" class="board-scroller">
     <div class="board" :class="{ 'is-dragging': dragging }">
     <article
       v-for="column in board.workflowColumns"
@@ -247,6 +278,7 @@ function columnStyle(column: Column) {
       class="column"
       :class="columnClass(board.inactiveColumn)"
       :style="columnStyle(board.inactiveColumn)"
+      @click="onInactiveRailClick"
     >
       <header class="column-head">
         <div class="column-title">
@@ -259,7 +291,7 @@ function columnStyle(column: Column) {
             class="inactive-toggle"
             type="button"
             :aria-expanded="inactiveOpen"
-            @click="toggleInactive"
+            @click.stop="toggleInactive"
           >
             <strong class="column-lock">Inactive</strong>
           </button>
@@ -318,6 +350,7 @@ function columnStyle(column: Column) {
         </template>
       </draggable>
     </article>
+    </div>
     </div>
 
     <ProjectModal
