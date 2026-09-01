@@ -11,6 +11,7 @@ import ProjectCard from './ProjectCard.vue'
 import ProjectModal from './ProjectModal.vue'
 
 const board = useBoardStore()
+const wrapEl = ref<HTMLElement | null>(null)
 const scrollerEl = ref<HTMLElement | null>(null)
 const dragging = ref(false)
 const modalOpen = ref(false)
@@ -93,12 +94,19 @@ function onBoardWheel(event: WheelEvent) {
   el.scrollLeft = next
 }
 
+function onWrapWheel(event: WheelEvent) {
+  if (scrollerEl.value?.contains(event.target as Node)) return
+  event.preventDefault()
+}
+
 onMounted(() => {
   scrollerEl.value?.addEventListener('wheel', onBoardWheel, { passive: false })
+  wrapEl.value?.addEventListener('wheel', onWrapWheel, { passive: false })
 })
 
 onUnmounted(() => {
   scrollerEl.value?.removeEventListener('wheel', onBoardWheel)
+  wrapEl.value?.removeEventListener('wheel', onWrapWheel)
 })
 
 function monthHours(project: Project) {
@@ -122,7 +130,7 @@ function columnStyle(column: Column) {
 </script>
 
 <template>
-  <section class="board-wrap">
+  <section ref="wrapEl" class="board-wrap">
     <div class="hours-toolbar board-toolbar">
       <button class="ghost-btn" type="button" @click="board.addColumn()">
         Add column
