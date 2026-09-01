@@ -16,6 +16,7 @@ import {
   columnIdForStatus,
   columnKind,
   columnsChanged,
+  hoursOffByDefault,
   isPinnedColumn,
   statusFromColumn,
   withPinnedColumns,
@@ -585,6 +586,18 @@ export const useBoardStore = defineStore('board', () => {
     await persistColumns(next)
   }
 
+  async function setColumnTrackHours(id: string, track: boolean) {
+    const current = columns.value.find((column) => column.id === id)
+    if (!current) return
+    const next = columns.value.map((column) => {
+      if (column.id !== id) return column
+      const { trackHours: _prev, ...rest } = column
+      if (track === !hoursOffByDefault(column)) return rest
+      return { ...rest, trackHours: track }
+    })
+    await persistColumns(next)
+  }
+
   async function addColumn() {
     await persistColumns([
       ...workflowColumns.value,
@@ -941,6 +954,7 @@ export const useBoardStore = defineStore('board', () => {
     renameColumn,
     setColumnColor,
     setColumnCondensed,
+    setColumnTrackHours,
     addColumn,
     removeColumn,
     createClient,

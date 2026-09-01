@@ -155,6 +155,7 @@ function setInactive(on: boolean) {
 </script>
 
 <template>
+  <Teleport to="body">
   <dialog ref="dialog" class="modal-backdrop" @close="emit('close')" @click="onDialogClick">
     <div class="modal" @click.stop>
       <header>
@@ -327,4 +328,5 @@ function setInactive(on: boolean) {
       </footer>
     </div>
   </dialog>
+  </Teleport>
 </template>

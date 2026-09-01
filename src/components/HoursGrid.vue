@@ -10,6 +10,7 @@ import {
   toDateKey,
   weekdayLabel,
 } from '../lib/format'
+import { tracksHours } from '../lib/columns'
 import { useBoardStore } from '../stores/board'
 import type { Project } from '../types'
 import ProjectModal from './ProjectModal.vue'
@@ -21,16 +22,18 @@ const month = ref(today.getMonth())
 const activeProject = ref<Project | null>(null)
 
 const days = computed(() => daysInMonth(year.value, month.value))
-const showInactive = ref(false)
 const hideIdle = ref(localStorage.getItem('slate.hours-hide-idle') === '1')
-const projects = computed(() =>
-  board.sortedProjects.filter((project) => {
+const projects = computed(() => {
+  const hiddenColumns = new Set(
+    board.sortedColumns.filter((column) => !tracksHours(column)).map((column) => column.id),
+  )
+  return board.sortedProjects.filter((project) => {
     if (project.archived) return false
-    if (project.inactive && !showInactive.value) return false
+    if (hiddenColumns.has(project.columnId)) return false
     if (hideIdle.value && hoursInMonth(project, year.value, month.value) <= 0) return false
     return true
-  }),
-)
+  })
+})
 
 function toggleHideIdle() {
   hideIdle.value = !hideIdle.value
@@ -90,14 +93,6 @@ const grandTotal = computed(() =>
         >
           {{ hideIdle ? 'Show idle' : 'Hide idle' }}
         </button>
-        <button
-          class="ghost-btn"
-          type="button"
-          :aria-pressed="showInactive"
-          @click="showInactive = !showInactive"
-        >
-          {{ showInactive ? 'Hide inactive' : 'Show inactive' }}
-        </button>
         <button class="ghost-btn" type="button" @click="jumpToday">Today</button>
       </div>
     </div>
@@ -106,7 +101,7 @@ const grandTotal = computed(() =>
       Add a project on the board before logging hours.
     </div>
     <div v-else-if="!projects.length" class="empty">
-      No visible projects this month. Show idle or inactive to bring more columns back.
+      No visible projects this month. Show idle, or turn on hours for a column.
     </div>
 
     <div v-else class="hours-scroller">

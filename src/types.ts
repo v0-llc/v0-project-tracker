@@ -7,6 +7,7 @@ export interface Column {
   kind?: ColumnKind
   color?: string
   condensed?: boolean
+  trackHours?: boolean
 }
 
 export interface Client {

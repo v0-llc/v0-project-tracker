@@ -20,6 +20,16 @@ export function isLeadsColumn(column: Column) {
   return columnKind(column) === 'workflow' && column.name.replace(/\s+/g, ' ').trim().toLowerCase() === 'leads'
 }
 
+export function hoursOffByDefault(column: Column) {
+  return isLeadsColumn(column) || columnKind(column) === 'inactive'
+}
+
+export function tracksHours(column: Column | undefined) {
+  if (!column) return true
+  if (column.trackHours !== undefined) return Boolean(column.trackHours)
+  return !hoursOffByDefault(column)
+}
+
 export function withPinnedColumns(columns: Column[]): Column[] {
   const workflow = columns.filter((column) => columnKind(column) === 'workflow')
   const retainer =
@@ -54,6 +64,7 @@ export function columnsChanged(before: Column[], after: Column[]) {
       column.order !== next.order ||
       column.color !== next.color ||
       Boolean(column.condensed) !== Boolean(next.condensed) ||
+      tracksHours(column) !== tracksHours(next) ||
       columnKind(column) !== columnKind(next)
     )
   })

@@ -6,6 +6,7 @@ import { effectiveRate, formatHours, formatMoney, formatRate, hoursInMonth, tota
 import { useBoardStore } from '../stores/board'
 import type { Column, Project } from '../types'
 import ColumnDensity from './ColumnDensity.vue'
+import ColumnHours from './ColumnHours.vue'
 import ColumnTint from './ColumnTint.vue'
 import ProjectCard from './ProjectCard.vue'
 import ProjectModal from './ProjectModal.vue'
@@ -95,7 +96,10 @@ function onBoardWheel(event: WheelEvent) {
 }
 
 function onWrapWheel(event: WheelEvent) {
-  if (scrollerEl.value?.contains(event.target as Node)) return
+  const target = event.target as HTMLElement | null
+  if (!target) return
+  if (scrollerEl.value?.contains(target)) return
+  if (target.closest('dialog')) return
   event.preventDefault()
 }
 
@@ -150,6 +154,7 @@ function columnStyle(column: Column) {
           <div class="column-meta">
             <span class="column-count">{{ lists[column.id]?.length ?? 0 }}</span>
             <ColumnTint :column-id="column.id" :color="column.color" />
+            <ColumnHours :column="column" />
             <ColumnDensity :column-id="column.id" :condensed="column.condensed" />
           </div>
           <input
@@ -220,6 +225,7 @@ function columnStyle(column: Column) {
           <div class="column-meta">
             <span class="column-count">Retainer · {{ lists[board.retainerColumn.id]?.length ?? 0 }}</span>
             <ColumnTint :column-id="board.retainerColumn.id" :color="board.retainerColumn.color" />
+            <ColumnHours :column="board.retainerColumn" />
             <ColumnDensity :column-id="board.retainerColumn.id" :condensed="board.retainerColumn.condensed" />
           </div>
           <strong class="column-lock">Retainers</strong>
@@ -293,6 +299,7 @@ function columnStyle(column: Column) {
           <div class="column-meta">
             <span class="column-count">{{ lists[board.inactiveColumn.id]?.length ?? 0 }} paid up</span>
             <ColumnTint :column-id="board.inactiveColumn.id" :color="board.inactiveColumn.color" />
+            <ColumnHours :column="board.inactiveColumn" />
             <ColumnDensity :column-id="board.inactiveColumn.id" :condensed="board.inactiveColumn.condensed" />
           </div>
           <button
