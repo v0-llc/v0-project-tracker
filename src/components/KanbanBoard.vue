@@ -164,11 +164,12 @@ function columnStyle(column: Column) {
           />
         </div>
         <div class="header-cluster">
-          <button class="icon-btn" type="button" aria-label="Add project" @click="openCreate(column.id)">+</button>
+          <button class="icon-btn hint" type="button" aria-label="Add project" data-hint="Add project" @click="openCreate(column.id)">+</button>
           <button
-            class="icon-btn"
+            class="icon-btn hint"
             type="button"
             aria-label="Remove column"
+            data-hint="Remove column"
             :disabled="board.workflowColumns.length <= 1"
             @click="removeColumn(column.id, column.name)"
           >
@@ -231,7 +232,7 @@ function columnStyle(column: Column) {
           <strong class="column-lock">Retainers</strong>
         </div>
         <div class="header-cluster">
-          <button class="icon-btn" type="button" aria-label="Add retainer" @click="openCreate(board.retainerColumn.id)">+</button>
+          <button class="icon-btn hint" type="button" aria-label="Add retainer" data-hint="Add retainer" @click="openCreate(board.retainerColumn.id)">+</button>
         </div>
       </header>
 

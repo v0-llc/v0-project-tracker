@@ -30,8 +30,8 @@ async function tryLocal() {
           <p class="label">Freelance production ledger</p>
           <ThemeToggle />
         </div>
-        <h1>Slate</h1>
-        <p class="lede">Keep every job, hour, and invoice in one quiet place.</p>
+        <h1 class="wordmark">Inari</h1>
+        <p class="lede">Every job, hour, and invoice, all in one place.</p>
 
         <div class="login-actions">
           <button
@@ -69,7 +69,6 @@ async function tryLocal() {
     </section>
 
     <aside class="login-aside">
-      <p class="label">Default stages</p>
       <ol class="stage-list">
         <li v-for="(name, index) in DEFAULT_COLUMN_NAMES" :key="name">
           <b>{{ String(index + 1).padStart(2, '0') }}</b>

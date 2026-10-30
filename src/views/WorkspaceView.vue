@@ -36,7 +36,7 @@ watch(photoURL, () => {
   <div class="app-shell">
     <header class="app-header" @wheel.prevent>
       <RouterLink class="brand" to="/">
-        <strong>Slate</strong>
+        <strong class="wordmark">Inari</strong>
         <span>Studio ledger</span>
       </RouterLink>
 

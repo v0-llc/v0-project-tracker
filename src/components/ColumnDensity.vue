@@ -15,11 +15,12 @@ async function toggle() {
 
 <template>
   <button
-    class="column-density"
+    class="column-density hint"
     type="button"
     :class="{ on: condensed }"
     :aria-pressed="Boolean(condensed)"
     :aria-label="condensed ? 'Show full cards' : 'Condense cards'"
+    :data-hint="condensed ? 'Show full cards' : 'Condense cards'"
     @click.stop="toggle"
   >
     <svg v-if="condensed" viewBox="0 0 16 16" aria-hidden="true">

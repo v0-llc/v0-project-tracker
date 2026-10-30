@@ -4,7 +4,11 @@ service cloud.firestore {
     function isAllowlisted() {
       return request.auth != null
         && request.auth.token.email is string
-        && request.auth.token.email.lower() in ['teddy@v0.run'];
+        && request.auth.token.email.lower() in [
+          'teddy@v0.run',
+          'matt@klenareed.com',
+          'grapefruitdream@gmail.com',
+        ];
     }
 
     match /users/{userId}/{document=**} {

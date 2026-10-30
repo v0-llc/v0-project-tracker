@@ -22,6 +22,7 @@ const logDate = ref(toDateKey(new Date()))
 const logAmount = ref('')
 const saving = ref(false)
 
+const isLogToday = computed(() => logDate.value === toDateKey(new Date()))
 const isEdit = computed(() => Boolean(props.project))
 const creatingClient = computed(() => draft.clientId === NEW_CLIENT_VALUE)
 const previewHours = computed(() => (props.project ? totalHours(props.project) : 0))
@@ -177,25 +178,29 @@ function setInactive(on: boolean) {
         <div class="field-row">
           <label class="field">
             <span class="label">Client</span>
-            <select v-model="draft.clientId">
-              <option value="">No client</option>
-              <option
-                v-for="client in board.sortedClients"
-                :key="client.id"
-                :value="client.id"
-              >
-                {{ client.name }}
-              </option>
-              <option :value="NEW_CLIENT_VALUE">+ New client</option>
-            </select>
+            <span class="select-wrap">
+              <select v-model="draft.clientId">
+                <option value="">No client</option>
+                <option
+                  v-for="client in board.sortedClients"
+                  :key="client.id"
+                  :value="client.id"
+                >
+                  {{ client.name }}
+                </option>
+                <option :value="NEW_CLIENT_VALUE">+ New client</option>
+              </select>
+            </span>
           </label>
           <label class="field">
             <span class="label">Column</span>
-            <select v-model="draft.columnId" :disabled="draft.retainer || draft.inactive">
-              <option v-for="column in workflowColumns" :key="column.id" :value="column.id">
-                {{ column.name }}
-              </option>
-            </select>
+            <span class="select-wrap">
+              <select v-model="draft.columnId" :disabled="draft.retainer || draft.inactive">
+                <option v-for="column in workflowColumns" :key="column.id" :value="column.id">
+                  {{ column.name }}
+                </option>
+              </select>
+            </span>
           </label>
         </div>
 
@@ -287,12 +292,15 @@ function setInactive(on: boolean) {
         </div>
 
         <div v-if="project" class="field-row">
-          <label class="field">
+          <label class="field" :class="{ 'log-today': isLogToday }">
             <span class="label">Log hours</span>
-            <input v-model="logDate" type="date" />
+            <span class="date-wrap">
+              <input v-model="logDate" type="date" :aria-label="isLogToday ? 'Today' : undefined" />
+              <span v-if="isLogToday" class="date-today-label">Today</span>
+            </span>
           </label>
           <label class="field">
-            <span class="label">Hours that day</span>
+            <span class="label">{{ isLogToday ? 'Hours today' : 'Hours that day' }}</span>
             <input
               v-model="logAmount"
               inputmode="decimal"
@@ -302,7 +310,7 @@ function setInactive(on: boolean) {
           </label>
         </div>
         <button v-if="project" class="ghost-btn" type="button" @click="addHours">
-          Save hours for that day
+          {{ isLogToday ? 'Save hours for today' : 'Save hours for that day' }}
         </button>
       </form>
 

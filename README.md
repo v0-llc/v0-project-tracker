@@ -1,4 +1,4 @@
-# Slate
+# Inari
 
 A Vue 3 workspace for tracking freelance production: kanban stages, daily hours, budgets, and effective hourly rate.
 

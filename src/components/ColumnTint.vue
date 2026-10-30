@@ -88,7 +88,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="root" class="column-tint" :class="{ open }">
+  <div ref="root" class="column-tint hint" :class="{ open }" data-hint="Column color">
     <button
       class="column-tint-swatch"
       type="button"
@@ -140,7 +140,9 @@ onUnmounted(() => {
           </button>
         </div>
         <label class="column-tint-custom">
-          <input type="color" :value="customValue" @input="onCustom" />
+          <span class="column-tint-disc" :style="{ background: customValue }">
+            <input type="color" :value="customValue" aria-label="Custom color" @input="onCustom" />
+          </span>
           <span>Custom</span>
         </label>
       </div>

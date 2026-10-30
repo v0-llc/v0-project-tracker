@@ -18,11 +18,12 @@ async function toggle() {
 
 <template>
   <button
-    class="column-hours"
+    class="column-hours hint"
     type="button"
     :class="{ on: tracking }"
     :aria-pressed="tracking"
     :aria-label="tracking ? 'Hide this column from hours' : 'Show this column in hours'"
+    :data-hint="tracking ? 'Hide from hours' : 'Show in hours'"
     @click.stop="toggle"
   >
     <svg viewBox="0 0 16 16" aria-hidden="true">

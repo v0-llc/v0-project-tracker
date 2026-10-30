@@ -10,7 +10,7 @@ import {
 import { isAllowedEmail } from '../lib/allowedUsers'
 import { isFirebaseConfigured, requireAuth } from '../firebase'
 
-const ACCESS_DENIED = 'This Google account is not allowed to use Slate.'
+const ACCESS_DENIED = 'This Google account is not allowed to use Inari.'
 
 const LOCAL_SESSION_KEY = 'slate.local-session'
 
